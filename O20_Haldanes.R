@@ -15,12 +15,12 @@ library(reshape2)
 library(cowplot)
 
 ####Import Files####
-weather = read_csv("O20_weather_raw.csv")
-#View(weather)
+weather = read_csv("raw/O20_weather_raw.csv")
+View(weather)
 
 ##separating date and time##
 
-weather <- separate(weather, TimeStamp, into = c("Date", "Time"), sep = "^\\S*\\K\\s+")
+weather <- separate(weather,TimeStamp, into = c("Date", "Time"), sep = "^\\S*\\K\\s+")
 weather$Date = format(as.Date(weather$Date, "%m/%d/%Y"), "20%y-%m-%d")
 
 ### create summary df####
@@ -58,7 +58,7 @@ sum(TPF5$Generations) ##8.044814
 ###### 25c 7 day generation time = 180 degree days per generation = standardized works out to 8 genrations per season 
 
 Phenos=read.csv("Phenos.csv")
-View(Pheno)
+#View(Pheno)
  ## convert all pheno means and sd to natural log
 Phenos$logLD=log(Phenos$LD)
 Phenos$logLDsd=log(Phenos$LDsd)
@@ -77,7 +77,7 @@ Phenos$logVIABsd=log(Phenos$Viabsd)
 Phenos$logBS=log(Phenos$BS)
 Phenos$logBSsd=log(Phenos$BSsd)
 
-View(Phenos)
+#View(Phenos)
 
 #### Each of these creates a d term SP term for each phenotype, I term is determiend from degreee day calcultions
 ####A01####
@@ -203,7 +203,7 @@ A12HALD= Phenos %>%
                    VIAB_HAL = ((VIABd/VIABSp)/I),
                    BS_HAL = ((BSd/BSSp)/I))
 A12HALD <- A12HALD[ -c(3:19) ]                   
-#View(A12HALD)
+View(A12HALD)
 
 ####B12####
 B12HALD= Phenos %>% 
@@ -704,25 +704,32 @@ ggplot(HALD_long, aes(Interval, logValue)) +
 
 
 breaks <- seq(0, 1.1 , by = 24)
+subset(HALD_long,Interval != "15")
 
-Hald_combined=ggplot(HALD_long, aes(1,absValue)) +
-  geom_jitter(aes(colour = Treatment), size = 5, width = .001) + 
+Hald_combined=ggplot(subset(HALD_long,Interval != "15"), aes(1,absValue)) +
+  geom_jitter(aes(shape= Treatment, color=Interval), size=5, width = .003) + 
   xlim(.995,1.005)+
-  labs(color = "Cage Treatment")+
-  scale_colour_manual(breaks=c("Low", "High"), label=c("Low","High"), values=c("grey","black"))+
-  scale_y_continuous(name="Rate of phenotypic change (Haldanes)", trans = log_trans(100), breaks = c(0.0001, 0.0100, 1.0000), labels = c("0.0001", "0.0100", "1.0000")) +
+  labs(color = "                                                                                                                                       Timepoint Interval")+
+  labs(shape = "               Cage Treatment")+
+  scale_shape_manual(breaks=c("Low", "High"), label=c("Low Quality","High Quality"), 
+                     values =c(19,17))+
+  scale_color_manual(breaks = c( "12", "23", "34", "45"),
+                     labels = c( "1-2", "2-3", "3-4", "4-5"),
+                     values = c("#D8D8D8","#909090","#000000","red"))+
+  scale_y_continuous(name="Rate of Phenotypic Change (Haldanes)", trans = log_trans(100), breaks = c(0.0001, 0.0100, 1.0000), labels = c("0.0001", "0.0100", "1.0000")) +
   theme_cowplot(14) +
   theme(axis.ticks.x = element_blank(),
         axis.text.x = element_blank(),
         axis.title.x = element_blank())
 Hald_combined
 
+
 load("fig2.rdata") 
 Fig2
 
 Fig2H <- ggarrange(Fig2, Hald_combined,
-                  labels = c("", "G"),
+                  labels = c("", "I"),
                   widths = c(1,.3),
-                  ncol = 2, nrow = 1, common.legend = TRUE, legend = "none")
+                  ncol = 2, nrow = 1, common.legend = TRUE)
 Fig2H
-1
+

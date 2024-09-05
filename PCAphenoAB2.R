@@ -15,7 +15,7 @@ library(ggpubr)
 ## Setting Working directory
 
 ABpca2 <- Phenos.cage ### this df is produced when generating figure 2, must complete that first. 
-ABpca2 <- ABpca2[, -c(8,9,11,12,14,15,17,18,20,21,23,24,25,26,27,29,30,32)]## remove SE and SD
+ABpca2 <- ABpca2[, -c(8,9,10,12,13,15,16,18,19,21,22,23,24,25,27,28,30,31,33)]## remove SE and SD
 ABpca2 <- subset(ABpca2, ABpca2$TP %in% c(0,2,4))
 #View(ABpca2)
 
@@ -39,25 +39,24 @@ ABpca2 <- subset(ABpca2, ABpca2$TP %in% c(0,2,4))
                     "bb"="black")
   
   AB2ColorListTrait<-c(
-    "DT"=brewer.pal(n=12, name="Set3")[1],
-    "DT_M"=brewer.pal(n=12, name="Set3")[2],
-    "DT_F"=brewer.pal(n=12, name="Set3")[3],
-    "Vb"=brewer.pal(n=12, name="Set3")[4],
-    "SR_M"=brewer.pal(n=12, name="Set3")[5],
-    "SR_F"=brewer.pal(n=12,name="Set3")[6],
-    "Fc"=brewer.pal(n=12, name="Set3")[7],
-    "BS"=brewer.pal(n=12, name="Set3")[8])
+    "LDf"="black",
+    "LDf"="black",
+    "Viab"="black",
+    "SRM"="black",
+    "SRF"="black",
+    "TOTF"="black",
+    "BS"="black")
   
   
   #display.brewer.pal(8,"Dark2")
   
   AB2TimeList=c("0","2","4")
   AB2PopulationList=c("aa","ab", "ba","bb")
-  AB2TraitsList<-data.frame(ABBRV=c("DT","DT_M","DT_F","Vb","SR_M","SR_F","Fc","BS"),LONG=c("Develeopment Time","Development Time (Males)","Development Time (Females)", "Viability","Starvation Resistance (Males)","Starvation Resistance (Females)","Fecundity","Body Size"))
-  AB2SigTrait3List<-data.frame(ABBRV=c("DT_F","SR_F","Vb","Fc","BS"),LONG=c("Development Time (Females)","Starvation Resistance (Females)","Viability","Fecundity","Body Size"))
+  AB2TraitsList<-data.frame(ABBRV=c("LDm","LDf","Viab","SRM","SRF","TOTF","BS"),LONG=c("Development Time (Males)","Development Time (Females)", "Viability","Starvation Resistance (Males)","Starvation Resistance (Females)","Fecundity","Body Size"))
+  AB2SigTrait3List<-data.frame(ABBRV=c("LDf","SRF","Viab","TOTF","BS"),LONG=c("Development Time (Females)","Starvation Resistance (Females)","Viability","Fecundity","Body Size"))
   
   AB2SelectionLabels=c("Founder","TP2","TP4" )
-  AB2PopulationLabels=c("Apple","Apple (Bloomington)","Bloomington (Apple)","Bloomington" )
+  AB2PopulationLabels=c("LQ","LQ (Phenotyed in HQ)","HQ (Phenotyped in LQ)","HQ" )
   AB2TimeShape=c("0"=8,"2"=17,"4"=19)
   
 
@@ -128,13 +127,13 @@ pBL<-ggplot()+theme_nothing()
     
     #View(AB2_BA)
     ### all variables 
+
+    AB2AA.pca<-prcomp(AB2_AA[8:14],scale=TRUE)
+    AB2BB.pca<-prcomp(AB2_BB[8:14],scale=TRUE)
+    AB2AB.pca<-prcomp(AB2_AB[8:14],scale=TRUE)
+    AB2BA.pca<-prcomp(AB2_BA[8:14],scale=TRUE)
     
-    AB2AA.pca<-prcomp(AB2_AA[7:14],scale=TRUE)
-    AB2BB.pca<-prcomp(AB2_BB[7:14],scale=TRUE)
-    AB2AB.pca<-prcomp(AB2_AB[7:14],scale=TRUE)
-    AB2BA.pca<-prcomp(AB2_BA[7:14],scale=TRUE)
-    
-    AB2.pca<-prcomp(ABpca2[7:14],scale=TRUE)
+    AB2.pca<-prcomp(ABpca2[8:14],scale=TRUE)
     
     
     ### sig variables
@@ -154,17 +153,55 @@ pBL<-ggplot()+theme_nothing()
     AB2AB.pca.df<-data.frame(Cage=AB2_AB$Cage,Population=AB2_AB$Population,Time=AB2_AB$Time,AB2AB.pca$x)
     AB2BA.pca.df<-data.frame(Cage=AB2_BA$Cage,Population=AB2_BA$Population,Time=AB2_BA$Time,AB2BA.pca$x)
     
-    AB2.pca.df<-data.frame(Cage=ABpca2$Cage,Population=ABpca2$Population,Time=ABpca2$Time,AB2.pca$x)
+    AB2.pca.df<-data.frame(Cage=ABpca2$Cage,Population=ABpca2$Population,Treat=ABpca2$Cage.Treat.x,Pheno=ABpca2$Pheno.Treat,Time=ABpca2$Time,AB2.pca$x)
     
+    View(AB2.pca.df)
+    
+    
+    
+    ####PCA PHENOTYPES COMBINED####
+   Pheno24.pca1=ggplot(AB2.pca.df, aes(x=PC1, y=PC2, shape = Time, color = Pheno, group=Pheno)) +
+      stat_ellipse()+
+      geom_point(size=3)+
+      scale_colour_manual(name = "Assay Diet", 
+                          breaks = c("a", "b"),
+                          labels = c("Low Quality","High Quality"),
+                          values = c("grey","black"))+
+      scale_shape_manual(breaks=c("0", "2", "4"), 
+                         label=c("Founder","Timepoint 2 (Summer)", "Timepoint 4 (Fall)"), 
+                         values =c(21,19,17))+
+      theme_cowplot()+
+      theme(legend.position = "bottom", legend.box = "horizontal")
+
+    
+    Pheno24.pca2=ggplot(AB2.pca.df, aes(x=PC1, y=PC2, shape = Time, color = Treat, group=Treat)) +
+      stat_ellipse()+
+      geom_point(size=3)+
+      scale_colour_manual(name = "Treatment", 
+                          breaks = c("a", "b"),
+                          labels = c("Low Quality","High Quality"),
+                          values = c("grey","black"))+
+      scale_shape_manual(breaks=c("0", "2", "4"), 
+                         label=c("Founder","Timepoint 2 (Summer)", "Timepoint 4 (Fall)"), 
+                         values =c(21,19,17))+
+      theme_cowplot()+
+      theme(legend.position = "bottom", legend.box = "horizontal")
+    
+    Pheno24.PCA <- ggarrange(Pheno24.pca1, Pheno24.pca2, ncol=1, labels = c("A","B"), common.legend = FALSE, font.label = list(size = 20))
+    
+    Pheno24.PCA
+    
+    ab2.pca.df.manov<-manova(cbind(PC1, PC2)~Treat, AB2.pca.df)
+    summary(ab2.pca.df.manov)
     
     ## manova for phenoed on apple / bloom all variables
     
     AB2.pca.AABA.df<-rbind(AB2AA.pca.df, AB2BA.pca.df)
-    AB2.AABA.PCA.aov<-manova(cbind(PC1,PC2,PC3,PC4,PC5,PC6,PC7,PC8)~Time*Population,AB2.pca.AABA.df)
+    AB2.AABA.PCA.aov<-manova(cbind(PC1,PC2,PC3,PC4,PC5,PC6,PC7)~Time*Population,AB2.pca.AABA.df)
     summary(AB2.AABA.PCA.aov) ### SIG TIME AND POPULATION NOT INTERCEPT
     
     AB2.pca.BBAB.df<-rbind(AB2BB.pca.df,AB2AB.pca.df)
-    AB2.BBAB.PCA.aov<-manova(cbind(PC1,PC2,PC3,PC4,PC5,PC6,PC7,PC8)~Time*Population, AB2.pca.BBAB.df)
+    AB2.BBAB.PCA.aov<-manova(cbind(PC1,PC2,PC3,PC4,PC5,PC6,PC7)~Time*Population, AB2.pca.BBAB.df)
     summary(AB2.BBAB.PCA.aov) ###SIG TIME NOT POPULATION OR INTERCEPT
     
     ##Sig Vars 
@@ -192,6 +229,8 @@ pBL<-ggplot()+theme_nothing()
     
     AB2AA.pca.vectors<-as.data.frame(AB2AA.pca$rotation)
     AB2AA.pca.vectors$ABBRV<-rownames(AB2AA.pca.vectors)
+    total <- merge(AB2AA.pca.vectors,AB2SigTrait3List,by="ABBRV")
+   
 
     AB2BB.pca.vectors<-as.data.frame(AB2BB.pca$rotation)
     AB2BB.pca.vectors$ABBRV<-rownames(AB2BB.pca.vectors)
@@ -209,15 +248,20 @@ pBL<-ggplot()+theme_nothing()
     
     AB2AA_S.pca.vectors<-as.data.frame(AB2AA_S.pca$rotation)
     AB2AA_S.pca.vectors$ABBRV<-rownames(AB2AA_S.pca.vectors)
+    AB2AA_S.pca.vectors <- merge(AB2AA_S.pca.vectors,AB2SigTrait3List,by="ABBRV")
 
+    
     AB2BB_S.pca.vectors<-as.data.frame(AB2BB_S.pca$rotation)
     AB2BB_S.pca.vectors$ABBRV<-rownames(AB2BB_S.pca.vectors)
+    AB2BB_S.pca.vectors <- merge(AB2BB_S.pca.vectors,AB2SigTrait3List,by="ABBRV")
 
     AB2AB_S.pca.vectors<-as.data.frame(AB2AB_S.pca$rotation)
     AB2AB_S.pca.vectors$ABBRV<-rownames(AB2AB_S.pca.vectors)
+    AB2AB_S.pca.vectors <- merge(AB2AB_S.pca.vectors,AB2SigTrait3List,by="ABBRV")
 
     AB2BA_S.pca.vectors<-as.data.frame(AB2BA_S.pca$rotation)
     AB2BA_S.pca.vectors$ABBRV<-rownames(AB2BA_S.pca.vectors)
+    AB2BA_S.pca.vectors <- merge(AB2BA_S.pca.vectors,AB2SigTrait3List,by="ABBRV")
 
     # CALCULATING VAR EXPLAINED
     ##All Vars 
@@ -598,9 +642,9 @@ pBL<-ggplot()+theme_nothing()
       scale_x_continuous(limits = c(F3_XLLIM, F3_XULIM)) + 
       scale_y_continuous(limits = c(F3B_YLLIM, F3B_YULIM)) +
       coord_fixed() + 
-      xlab(paste("PC1 -",percent(AB1_S.pca.var.explained[1], accuracy = 0.1))) +
-      ylab(paste("-PC2 -",percent(AB1_S.pca.var.explained[2], accuracy = 0.1))) +
-      ggtitle("Apple and Bloomington, Phenotyped on Bloomington, Significant Traits Only") +
+      xlab(paste("PC1 -",percent(AB2_S.pca.var.explained[1], accuracy = 0.1))) +
+      ylab(paste("-PC2 -",percent(AB2_S.pca.var.explained[2], accuracy = 0.1))) +
+      ggtitle("C") +
       theme(legend.justification=F3_LGDJUST, 
             legend.position = F3_LGDPOS,
             legend.direction = "vertical", 
@@ -653,9 +697,9 @@ pBL<-ggplot()+theme_nothing()
       scale_x_continuous(limits = c(F3_XLLIM, F3_XULIM)) + 
       scale_y_continuous(limits = c(F3B_YLLIM, F3B_YULIM)) +
       coord_fixed() + 
-      xlab(paste("PC1 -",percent(AB1_S.pca.var.explained[1], accuracy = 0.1))) +
-      ylab(paste("-PC2 -",percent(AB1_S.pca.var.explained[2], accuracy = 0.1))) +
-      ggtitle("Apple and Bloomington, Phenotyped on Apple, Significant Traits Only") +
+      xlab(paste("PC1 -",percent(AB2_S.pca.var.explained[1], accuracy = 0.1))) +
+      ylab(paste("-PC2 -",percent(AB2_S.pca.var.explained[2], accuracy = 0.1))) +
+      ggtitle("F") +
       theme(legend.justification=F3_LGDJUST, 
             legend.position = F3_LGDPOS,
             legend.direction = "vertical", 
@@ -665,72 +709,74 @@ pBL<-ggplot()+theme_nothing()
       )
     
     AB2SOnApple
-AB2BB_S
+View(AB2BB_S.pca.vectors)
     #####Vectors####
     VecS_BB<-ggplot() +  
       coord_fixed() + theme(legend.position = "none") +
       geom_path(aes(x, y), data = circle, colour=F3_CIRCLE_COLOR)+ 
       geom_segment(data= AB2BB_S.pca.vectors, 
-                   aes(x = 0, y = 0, xend = PC1, yend = PC2, color=ABBRV), alpha=F3_VECTOR_ALPHA,
-                   arrow = arrow(length = unit(F3_ARROWHEAD, 'picas'),type="closed"),size=F3B_ARROWSIZE) + 
+                   aes(x = 0, y = 0, xend = PC1, yend = PC2,),
+                   arrow = arrow(length = unit(F3_ARROWHEAD, 'picas'),type="closed"),size=.5) + 
       geom_text(data= AB2BB_S.pca.vectors, fontface = "bold",
-                aes(x=F3_VECTORSCALEX*PC1,y=F3_VECTORSCALEY*PC2,label=str_wrap(ABBRV, 2),color=ABBRV ),
-                size=F3B_TEXTSIZE) + scale_color_manual(values = ColorListTrait) +
+                aes(x=F3_VECTORSCALEX*PC1,y=F3_VECTORSCALEY*PC2,label=str_wrap(LONG),color=ABBRV ),
+                size=2) + scale_color_manual(values = AB2ColorListTrait) +
       theme(plot.background=element_blank(),
             panel.border = element_blank(),
             panel.grid.minor = element_blank(),
             axis.title = element_blank(),
             axis.text = element_text(size=AXISTEXTSIZE),
             panel.background = element_rect(fill = "transparent",colour = "transparent"))
-  
+  VecS_BB
     VecS_AB<-ggplot() +  
       coord_fixed() + theme(legend.position = "none") +
       geom_path(aes(x, y), data = circle, colour=F3_CIRCLE_COLOR)+ 
       geom_segment(data= AB2AB_S.pca.vectors, 
-                   aes(x = 0, y = 0, xend = PC1, yend = PC2, color=ABBRV), alpha=F3_VECTOR_ALPHA,
+                   aes(x = 0, y = 0, xend = PC1, yend = PC2, color="black"),
                    arrow = arrow(length = unit(F3_ARROWHEAD, 'picas'),type="closed"),size=F3B_ARROWSIZE) + 
       geom_text(data= AB2AB_S.pca.vectors, fontface = "bold",
-                aes(x=F3_VECTORSCALEX*PC1,y=F3_VECTORSCALEY*PC2,label=str_wrap(ABBRV, 2),color=ABBRV ),
-                size=F3B_TEXTSIZE) + scale_color_manual(values = ColorListTrait) +
+                aes(x=F3_VECTORSCALEX*PC1,y=F3_VECTORSCALEY*PC2,label=str_wrap(LONG,1),color=ABBRV ),
+                size=2) + scale_color_manual(values = AB2ColorListTrait) +
       theme(plot.background=element_blank(),
             panel.border = element_blank(),
             panel.grid.minor = element_blank(),
             axis.title = element_blank(),
             axis.text = element_text(size=AXISTEXTSIZE),
             panel.background = element_rect(fill = "transparent",colour = "transparent"))
+    VecS_AB
     
     VecS_AA<-ggplot() +  
       coord_fixed() + theme(legend.position = "none") +
       geom_path(aes(x, y), data = circle, colour=F3_CIRCLE_COLOR)+ 
       geom_segment(data= AB2AA_S.pca.vectors, 
-                   aes(x = 0, y = 0, xend = PC1, yend = PC2, color=ABBRV), alpha=F3_VECTOR_ALPHA,
+                   aes(x = 0, y = 0, xend = PC1, yend = PC2,),
                    arrow = arrow(length = unit(F3_ARROWHEAD, 'picas'),type="closed"),size=F3B_ARROWSIZE) + 
-      geom_text(data=AB2BB.pca.vectors, fontface = "bold",
-                aes(x=F3_VECTORSCALEX*PC1,y=F3_VECTORSCALEY*PC2,label=str_wrap(ABBRV, 2),color=ABBRV ),
-                size=F3B_TEXTSIZE) + scale_color_manual(values = ColorListTrait) +
+      geom_text(data=AB2AA_S.pca.vectors, fontface = "bold",
+                aes(x=F3_VECTORSCALEX*PC1,y=F3_VECTORSCALEY*PC2,label=str_wrap(LONG, 2),color=ABBRV ),
+                size=2) + scale_color_manual(values = AB2ColorListTrait) +
       theme(plot.background=element_blank(),
             panel.border = element_blank(),
             panel.grid.minor = element_blank(),
             axis.title = element_blank(),
             axis.text = element_text(size=AXISTEXTSIZE),
             panel.background = element_rect(fill = "transparent",colour = "transparent"))
+    VecS_AA
     
     VecS_BA<-ggplot() +  
       coord_fixed() + theme(legend.position = "none") +
       geom_path(aes(x, y), data = circle, colour=F3_CIRCLE_COLOR)+ 
       geom_segment(data= AB2BA_S.pca.vectors, 
-                   aes(x = 0, y = 0, xend = PC1, yend = PC2, color=ABBRV), alpha=F3_VECTOR_ALPHA,
+                   aes(x = 0, y = 0, xend = PC1, yend = PC2,),
                    arrow = arrow(length = unit(F3_ARROWHEAD, 'picas'),type="closed"),size=F3B_ARROWSIZE) + 
       geom_text(data= AB2BA_S.pca.vectors, fontface = "bold",
-                aes(x=F3_VECTORSCALEX*PC1,y=F3_VECTORSCALEY*PC2,label=str_wrap(ABBRV, 2),color=ABBRV ),
-                size=F3B_TEXTSIZE) + scale_color_manual(values = ColorListTrait) +
+                aes(x=F3_VECTORSCALEX*PC1,y=F3_VECTORSCALEY*PC2,label=str_wrap(LONG),color=ABBRV ),
+                size=2) + scale_color_manual(values = AB2ColorListTrait) +
       theme(plot.background=element_blank(),
             panel.border = element_blank(),
             panel.grid.minor = element_blank(),
             axis.title = element_blank(),
             axis.text = element_text(size=AXISTEXTSIZE),
             panel.background = element_rect(fill = "transparent",colour = "transparent"))
-    
+    VecS_BA
     
 
     ####DUMMY PLOT TO MAKE LEGEND####
@@ -746,9 +792,10 @@ AB2BB_S
       geom_polygon(data=AB2BA.4.pca.hull, alpha=F3_FILLALPHA,aes(x=PC1,y=PC2,fill=as.factor(Time))) +
       geom_polygon(data=AB2AB.2.pca.hull, alpha=0,aes(x=PC1,y=PC2,fill=as.factor(Time),color=as.factor(Population)),size=F3_LINESIZE) +
       geom_polygon(data=AB2AB.2.pca.hull, alpha=F3_FILLALPHA,aes(x=PC1,y=PC2,fill=as.factor(Time))) +
-      scale_color_manual(values =AB2ColorListPopulation, breaks=c("aa","ab","ba","bb"), labels = c("Apple","Apple (Bloomington)","Bloomington (Apple)","Bloomington" )) +
+      scale_color_manual(values =AB2ColorListPopulation, breaks=c("aa","ab","ba","bb"), labels = c("LQ","LQ (Assayed in HQ)","HQ (Assayed in LQ)","LQ" )) +
       scale_shape_manual(guide="legend", values = TimeShape, breaks = c(0,2,4), labels = c("Foudner","TP2","TP4")) +
-      scale_fill_manual(guide="legend", values=ColorListTime, breaks = c(0,2,4), labels = c("Founder","TP2","TP4"))
+      scale_fill_manual(guide="legend", values=ColorListTime, breaks = c(0,2,4), labels = c("Founder","TP2","TP4")) +
+      theme(legend.position = "bottom")
     Legend2_PLOT
     
     legend2 <- get_legend(Legend2_PLOT)        
@@ -758,7 +805,8 @@ AB2BB_S
 
     ####Compound Plots####
     
-    Vec_BBAB <- ggarrange(Vec_BB,Vec_AB, ncol=2, labels = c("Bloomington Pops","Apple Pops"), font.label = list(size = 8))
+    Vec_BBAB <- ggarrange(Vec_BB,Vec_AB, ncol=2, labels = c("Bloomington Pops","Apple Pops"), font.label = list(size = 10))
+    Vec_BBAB
     
     AB2OnBloomVEC <-ggarrange(Vec_BBAB, AB2OnBloom, ncol = 1 , heights = c(.3,1))
     
@@ -767,19 +815,19 @@ AB2BB_S
     AB2OnAppleVEC<-ggarrange(Vec_AABA, AB2OnApple, ncol=1, heights = c(.3,1))
     
     AB2ALLTRAITS<-ggarrange (AB2OnBloomVEC, AB2OnAppleVEC, legend2, ncol=3, widths=c(1,1,.2))
+    AB2ALLTRAITS 
+    
+    
+    VecS_BBAB <- ggarrange(VecS_BB,VecS_AB, ncol=2, labels = c("A ","B"), font.label = list(size = 8))
+
+    AB2SOnBloomVEC <-ggarrange(VecS_BBAB, AB2SOnBloom, ncol = 1, heights = c(.5,1))
+ 
+    VecS_AABA <-ggarrange(VecS_AA, VecS_BA, ncol=2, labels =c("D", "E"), font.label = list(size=8))
+    
+    AB2SOnAppleVEC<-ggarrange(VecS_AABA, AB2SOnApple, ncol=1, heights = c(.,1))
+    
+    AB2SIGTRAIT<-ggarrange (AB2SOnBloomVEC, AB2SOnAppleVEC, ncol=2, widths=c(1,1,.2))
    
-    
-    
-    VecS_BBAB <- ggarrange(VecS_BB,VecS_AB, ncol=2, labels = c("Bloomington Pops","Apple Pops"), font.label = list(size = 8))
-    
-    AB2SOnBloomVEC <-ggarrange(VecS_BBAB, AB2SOnBloom, ncol = 1 , heights = c(.3,1))
-    
-    VecS_AABA <-ggarrange(VecS_AA, VecS_BA, ncol=2, labels =c("Apple Pops", "Bloomington Pops"), font.label = list(size=8))
-    
-    AB2SOnAppleVEC<-ggarrange(VecS_AABA, AB2SOnApple, ncol=1, heights = c(.3,1))
-    
-    AB2SIGTRAITS<-ggarrange (AB2SOnBloomVEC, AB2SOnAppleVEC, legend2, ncol=3, widths=c(1,1,.2))
-    
-    AB2ALLTRAITS    
-    AB2SIGTRAITS    
+    AB2SIGTRAITS <-ggarrange(AB2SIGTRAIT,legend2, ncol=1, heights = c(1,.1))  
+    AB2SIGTRAITS
     

@@ -20,10 +20,10 @@ ABpca1 <- ABpca1[, -c(8,9,11,12,14,15,17,18,20,21,23,24,25,26,27,29,30,32)]## re
 ABpca1$Time<-factor(ABpca1$TP,AB1TimeList)
 ABpca1$Population=factor(ABpca1$Cage.Pheno,AB1PopulationList)
 ABpca1<-ABpca1 %>% arrange(Cage,Time,Population)
-
+View(ABpca1)
 
 # CALCULATING THE PRINCIPAL COMPONENTS
-AB1.pca<-prcomp(ABpca1[7:14],scale=TRUE)
+AB1.pca<-prcomp(ABpca1[8:15],scale=TRUE)
 
 # GETTING PCA COORDINATES TO A DATA FRAME
 AB1.pca.df<-data.frame(Cage=ABpca1$Cage,Population=ABpca1$Population,Time=ABpca1$Time,AB1.pca$x)
@@ -178,11 +178,12 @@ pBL<-ggplot()+theme_nothing()
     AB1_5<- ABpca1 %>% subset(Time=="5")
     
     ### all variables 
-    AB1AP.pca<-prcomp(AB1_AP[7:14],scale=TRUE)
-    AB1BL.pca<-prcomp(AB1_BL[7:14],scale=TRUE)
-    AB1.pca<-prcomp(ABpca1[7:14],scale=TRUE)
+    AB1AP.pca<-prcomp(AB1_AP[8:15],scale=TRUE)
+    View(AB1_AP)
+    AB1BL.pca<-prcomp(AB1_BL[8:15],scale=TRUE)
+    AB1.pca<-prcomp(ABpca1[8:15],scale=TRUE)
 
-    
+    #####
     ### sig variables
     AB1AP_S.pca<-prcomp(AB1_AP[c(9,11:14)],scale=TRUE)
     AB1BL_S.pca<-prcomp(AB1_BL[c(9,11:14)],scale=TRUE)

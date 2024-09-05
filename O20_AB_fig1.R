@@ -10,10 +10,11 @@ library(cowplot)
 library(nlme)
 library(lme4)
 library(lubridate)
+library(lsmeans)
 
 ####Import Files####
-weather = read_csv("O20_weather_raw.csv")
-census = read_csv("O20AB_CS_raw.csv")
+weather = read_csv("raw/O20_weather_raw.csv")
+census = read_csv("raw/O20AB_CS_raw.csv")
 #View(weather)
 
 ##separating date and time##
@@ -139,20 +140,58 @@ test3+ theme(legend.position='bottom')
 CensusALL = census
 names(census)[9] ="picavg"
 CensusALL = census
-View(CensusALL)
-CensusALLanv<-lme(picavg ~ Date*Cage_treatment, random=~1|Cage_number/Date, data=CensusALL)
-anova(CensusALLanv) ## sig Date, insig cage_treatment and interaction 
+CensusALL$Date=as.Date(CensusALL$Date)
 
-##Expanding timepoints##
-CensusExpand=subset(census, census$Date == c("2020-07-21") | census$Date == c("2020-08-14"))
+CensusALL=CensusALL %>% 
+  mutate(TP = rank(Date)) 
+
+CensusALL$TP=as.numeric(CensusALL$TP)
+CensusALL$Date=as.factor(CensusALL$Date)
+CensusALL$DateCage <- paste(CensusALL$Date,CensusALL$Cage_number)
+View(CensusALL)
+
+CensusALLanv<-lme(picavg ~ TP*Cage_treatment, random=~1|Cage_number/Date, data=CensusALL)
+anova(CensusALLanv) ## sig Date, insig cage_treatment and interaction 
+summary(CensusALLanv)
+(CensusALLanv)
+residuals(CensusALLanv)
+
+options('max.print' = 1000000)  
+pairs=lsmeans(CensusALLanv, pairwise ~ Date:Cage_treatment)
+summ=summary(pairs$contrasts)
+View(summ)
+
+
+write.csv(summ, "lsmeans-pairwise-fig1.csv")
+### Second Mixed-Effect model
+install.packages("lmerTest")
+library(lmerTest)
+
+int_model1 <- lmer(picavg ~ Date*Cage_treatment + (1|Cage_number), data=CensusALL)
+summary(int_model1)
+
+
+.##Expanding timepoints##
+CensusExpand=subset(census, census$Date == c("2020-08-14") | census$Date == c("2020-08-31"))
+View(CensusExpand)
+CensusExpand$Date=as.numeric(CensusExpand$Date)
 CensusExpandanv<-lme(picavg ~ Date*Cage_treatment, random=~1|Cage_number/Date, data=CensusExpand)
-anova(CensusExpandanv) ## Sig Date and Treatment, insig interaction
+anova(CensusExpandanv) ## Sig Date, insig interaction and treatment 
+summary(CensusExpandanv)
+
+##Peak timepoints##
+CensusPeak=subset(census, census$Date == c("2020-09-04") | census$Date == c("2020-09-11") | census$Date == c("2020-09-18") | census$Date == c("2020-09-25"))
+CensusPeak$Date=as.numeric(CensusPeak$Date)
+CensusPeakanv<-lme(picavg ~ Date*Cage_treatment, random=~1|Cage_number, data=CensusPeak)
+anova(CensusPeakanv) ## Sig Date  insig interaction and treatment 
+summary(CensusPeakanv)
 
 ##Collapse timepoints##
 CensusCollapse=subset(census, census$Date == c("2020-10-09") | census$Date == c("2020-10-18") | census$Date == c("2020-11-01") | census$Date == c("2020-11-10") | census$Date == c("2020-11-21"))
+CensusCollapse$Date=as.numeric(CensusCollapse$Date)
 CensusCollapseanv<-lme(picavg ~ Date*Cage_treatment, random=~1|Cage_number/Date, data=CensusCollapse)
 anova(CensusCollapseanv) ## Sig Date and Treatment, insig interaction
-
+summary(CensusCollapseanv)
 
 
 

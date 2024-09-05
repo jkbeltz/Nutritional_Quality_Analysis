@@ -1,4 +1,4 @@
-setwd("/Users/jackbeltz/Desktop/AB/AppleVBloomClustering")
+setwd("/Users/jackbeltz/Documents/PENN/Dissertation/CH 2:3(Orchard 20)/AB/AppleVBloomClustering")
 library('tidyverse')
 library('dplyr')
 library('ggplot2')
@@ -109,7 +109,10 @@ View(b.sig)
 B <- ggplot(stats.a.arr, aes(x  = chromcluster, y = Treatment, fill = median.target)) +
   geom_tile() +
   scale_x_discrete(name = "Position", breaks = c("2L 1", "2R 1", "3L 1", "3R 1", "X 1"), labels = c("2L", "2R", "3L", "3R", "X")) +
-  scale_fill_gradientn(colours = c("blue", "white", "red"),
+  scale_fill_gradientn(name="  Allele 
+  Frequency 
+  Shift",
+                       colours = c("blue", "white", "red"),
                        values = scales::rescale(c(-0.006046, -0.001, 0, 0.02, 0.046)))+
   #scale_fill_gradient2(name = "Shift", high = "red", mid="white",low = "navy", limits=c(-0.006046,.046 )) +
   theme_minimal_hgrid() +
