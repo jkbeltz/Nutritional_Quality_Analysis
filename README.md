@@ -7,6 +7,6 @@ materials. Data files contained in "Raw", code is designed to be run O20_AB_fig1
 by the Haldanes, and PCAPheno files. The final version of Figure 2 is generated in O20-Haldanes, and figure 3 in 
 ClusterHeatMap. 
 
-Microbial analysis conducted uysing R and QIIME pipeline, following (https://github.com/jbisanz/16Spipelines.git),  16s Sequence Data found in the Raw Folder. 
+Microbial analysis conducted uysing R and QIIME2 pipeline, following (https://github.com/jbisanz/16Spipelines.git),  16s Sequence Data found in the Raw Folder. 
 
 
